@@ -214,12 +214,10 @@
             border-left: 3px solid var(--accent-red); padding: 12px 15px;
             margin-bottom: 10px; border-radius: 4px 8px 8px 4px;
             display: flex; justify-content: space-between; align-items: center; position: relative;
-            cursor: pointer; /* Курсор-рука, чтобы было понятно, что можно нажать */
+            cursor: pointer;
             transition: background 0.2s;
         }
-        .history-item:hover {
-            background: rgba(30, 15, 15, 0.9);
-        }
+        .history-item:hover { background: rgba(30, 15, 15, 0.9); }
         .finished .history-item { border-left: 3px solid #444; background: #0d0505; }
         .finished .history-item:hover { background: #150808; }
 
@@ -277,8 +275,12 @@
         .remove-player-btn { background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 16px; }
 
         .rounds-list { text-align: left; max-height: 300px; overflow-y: auto; margin-bottom: 20px; background: #050000; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
-        .round-item { padding: 8px; border-bottom: 1px solid #222; font-size: 14px; display: flex; justify-content: space-between;}
+        .round-item { padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;}
         .round-item:last-child { border-bottom: none; }
+        .round-info { display: flex; flex-direction: column; gap: 4px; }
+        .round-time { font-size: 12px; color: var(--text-muted); font-family: 'Oswald', sans-serif; }
+        .round-roster { font-size: 11px; color: #aaa; }
+        .round-score { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -395,7 +397,7 @@
     </div>
 
     <div class="modal-overlay" id="viewRoundsModal">
-        <div class="modal-content">
+        <div class="modal-content" style="width: 450px;">
             <h3 style="margin-top:0; font-family:'Oswald'; text-transform:uppercase; color: var(--accent-red);">История раундов</h3>
             <div class="rounds-list" id="roundsListContainer"></div>
             <button class="modal-btn" onclick="document.getElementById('viewRoundsModal').style.display = 'none'">Закрыть</button>
@@ -614,16 +616,20 @@
             const scoreEnemy = parseInt(document.getElementById('score-enemy').value) || 0;
             const isDrop = document.getElementById('player-drop').checked;
             if (scoreNfs === 0 && scoreEnemy === 0) { alert('Счет 0:0, нечего сохранять.'); return; }
-            const time = document.getElementById('match-time').value;
+            
+            // ВРЕМЯ БЕРЕТСЯ С ЖИВЫХ ЧАСОВ, А НЕ ИЗ ИНПУТА
+            const now = new Date();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
             const rosterString = getRosterString();
-            const roundData = { time: time, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
+            const roundData = { time: currentTime, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
             currentSessionRounds.unshift(roundData);
             const list = document.getElementById('current-history-list');
             const item = document.createElement('div');
             item.className = 'history-item';
             item.innerHTML = `
                 <div class="history-info">
-                    <div class="history-date">Раунд в ${time}</div>
+                    <div class="history-date">Раунд в ${currentTime}</div>
                     ${isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
                     ${rosterString ? `<div class="history-roster"><span>Состав:</span> ${rosterString}</div>` : ''}
                 </div>
@@ -701,8 +707,11 @@
                     const div = document.createElement('div');
                     div.className = 'round-item';
                     div.innerHTML = `
-                        <span>${round.time} ${round.isDrop ? '(Не 8/8)' : ''}</span>
-                        <strong>${round.nfs} : ${round.enemy}</strong>
+                        <div class="round-info">
+                            <div class="round-time">Раунд в ${round.time} ${round.isDrop ? '<span style="color:#ffaa00">(Не 8/8)</span>' : ''}</div>
+                            ${round.roster ? `<div class="round-roster">Состав: ${round.roster}</div>` : ''}
+                        </div>
+                        <div class="round-score">${round.nfs} : ${round.enemy}</div>
                     `;
                     container.appendChild(div);
                 });
@@ -724,9 +733,7 @@
                     globalMatches.push(match);
                     const item = document.createElement('div');
                     item.className = 'history-item';
-                    // Делаем карточку кликабельной
                     item.onclick = (e) => {
-                        // Если кликнули на кнопку редактирования или удаления, не открываем раунды
                         if (e.target.tagName === 'BUTTON') return;
                         window.viewRounds(match.id);
                     };
