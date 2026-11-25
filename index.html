@@ -278,7 +278,7 @@
         .round-item { padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;}
         .round-item:last-child { border-bottom: none; }
         .round-info { display: flex; flex-direction: column; gap: 4px; }
-        .round-time { font-size: 12px; color: var(--text-muted); font-family: 'Oswald', sans-serif; }
+        .round-time { font-size: 12px; color: var(--text-main); font-family: 'Oswald', sans-serif; font-weight: 700;}
         .round-roster { font-size: 11px; color: #aaa; }
         .round-score { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; white-space: nowrap; }
     </style>
@@ -429,12 +429,15 @@
         let globalMatches = []; 
         let playerDatabase = [];
 
+        let sessionStartTime = null; // Время старта стака
+
         window.updateLiveClock = function() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             document.getElementById('live-clock').innerText = `${hours}:${minutes}:${seconds}`;
+            
             if (!isSessionActive) {
                 document.getElementById('match-time').value = `${hours}:${minutes}`;
                 document.getElementById('match-date').value = now.toISOString().split('T')[0];
@@ -551,6 +554,7 @@
         window.startSession = function() {
             document.getElementById('startScreen').style.display = 'none';
             isSessionActive = true;
+            sessionStartTime = Date.now(); // Засекаем время старта стака
             document.getElementById('score-nfs').value = 0;
             document.getElementById('score-enemy').value = 0;
             currentSessionRounds = [];
@@ -617,19 +621,20 @@
             const isDrop = document.getElementById('player-drop').checked;
             if (scoreNfs === 0 && scoreEnemy === 0) { alert('Счет 0:0, нечего сохранять.'); return; }
             
-            // ВРЕМЯ БЕРЕТСЯ С ЖИВЫХ ЧАСОВ, А НЕ ИЗ ИНПУТА
-            const now = new Date();
-            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            // Считаем время с момента старта
+            const elapsedMs = Date.now() - sessionStartTime;
+            const elapsedMin = Math.floor(elapsedMs / 60000);
+            const timeString = `+${elapsedMin} мин.`; 
             
             const rosterString = getRosterString();
-            const roundData = { time: currentTime, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
+            const roundData = { time: timeString, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
             currentSessionRounds.unshift(roundData);
             const list = document.getElementById('current-history-list');
             const item = document.createElement('div');
             item.className = 'history-item';
             item.innerHTML = `
                 <div class="history-info">
-                    <div class="history-date">Раунд в ${currentTime}</div>
+                    <div class="history-date">Раунд ${timeString}</div>
                     ${isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
                     ${rosterString ? `<div class="history-roster"><span>Состав:</span> ${rosterString}</div>` : ''}
                 </div>
@@ -708,8 +713,8 @@
                     div.className = 'round-item';
                     div.innerHTML = `
                         <div class="round-info">
-                            <div class="round-time">Раунд в ${round.time} ${round.isDrop ? '<span style="color:#ffaa00">(Не 8/8)</span>' : ''}</div>
-                            ${round.roster ? `<div class="round-roster">Состав: ${round.roster}</div>` : ''}
+                            <div class="round-time">${round.time} ${round.isDrop ? '<span style="color:#ffaa00">(Не 8/8)</span>' : ''}</div>
+                            <div class="round-roster">${round.roster || 'Состав не указан'}</div>
                         </div>
                         <div class="round-score">${round.nfs} : ${round.enemy}</div>
                     `;
