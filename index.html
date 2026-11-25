@@ -214,8 +214,14 @@
             border-left: 3px solid var(--accent-red); padding: 12px 15px;
             margin-bottom: 10px; border-radius: 4px 8px 8px 4px;
             display: flex; justify-content: space-between; align-items: center; position: relative;
+            cursor: pointer; /* Курсор-рука, чтобы было понятно, что можно нажать */
+            transition: background 0.2s;
+        }
+        .history-item:hover {
+            background: rgba(30, 15, 15, 0.9);
         }
         .finished .history-item { border-left: 3px solid #444; background: #0d0505; }
+        .finished .history-item:hover { background: #150808; }
 
         .history-info { display: flex; flex-direction: column; gap: 4px; width: 100%;}
         .history-date { font-size: 11px; color: var(--text-muted); font-family: 'Oswald', sans-serif; }
@@ -233,7 +239,6 @@
         }
         .ctrl-btn:hover { opacity: 1; transform: scale(1.1); }
         .edit-roster-btn { color: var(--text-main); }
-        .view-rounds-btn { color: var(--accent-red); font-weight: bold;}
         .delete-btn { color: var(--accent-red); }
 
         .history-note { font-size: 11px; color: #ffaa00; }
@@ -719,6 +724,13 @@
                     globalMatches.push(match);
                     const item = document.createElement('div');
                     item.className = 'history-item';
+                    // Делаем карточку кликабельной
+                    item.onclick = (e) => {
+                        // Если кликнули на кнопку редактирования или удаления, не открываем раунды
+                        if (e.target.tagName === 'BUTTON') return;
+                        window.viewRounds(match.id);
+                    };
+                    
                     const dateObj = new Date(match.date);
                     const formattedDate = dateObj.toLocaleDateString('ru-RU');
                     item.innerHTML = `
@@ -729,7 +741,6 @@
                             <div class="history-roster">
                                 <span>Состав:</span> ${match.roster || 'Не указан'}
                                 <div class="history-controls">
-                                    <button class="ctrl-btn view-rounds-btn" onclick="viewRounds('${match.id}')">👁️ Раунды</button>
                                     <button class="ctrl-btn edit-roster-btn" onclick="openEditRoster('${match.id}')">✏️ Изменить</button>
                                     <button class="ctrl-btn delete-btn" onclick="deleteMatch('${match.id}')">🗑️ Удалить</button>
                                 </div>
