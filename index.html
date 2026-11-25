@@ -104,11 +104,9 @@
 
         .roster-col { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
 
-        /* ТЕМНЫЕ ВЫПАДАЮЩИЕ СПИСКИ */
         select.roster-input {
             font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700;
-            background: #110a0a; /* Темный фон */
-            border: 1px solid var(--border-color);
+            background: #110a0a; border: 1px solid var(--border-color);
             color: var(--text-main); padding: 8px 5px; border-radius: 6px;
             outline: none; text-align: center; transition: 0.3s;
             width: 100%; box-sizing: border-box; cursor: pointer;
@@ -116,8 +114,7 @@
             text-align-last: center;
         }
         select.roster-input:focus { border-color: var(--accent-red); background: rgba(204, 0, 0, 0.1); }
-        select.roster-input option { background: #110a0a; color: #fff; } /* Темные опции */
-        
+        select.roster-input option { background: #110a0a; color: #fff; }
         select.roster-sub-input { background: #0d0505; border: 1px dashed #333; color: #aaa; font-size: 11px; }
 
         .vs-container {
@@ -229,13 +226,14 @@
         }
         .history-roster span { color: var(--text-main); font-weight: 700; }
         
-        .history-controls { display: flex; gap: 5px; margin-top: 5px; }
+        .history-controls { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
         .ctrl-btn {
             background: none; border: none; cursor: pointer; font-size: 12px;
             padding: 2px 5px; opacity: 0.6; transition: 0.2s;
         }
         .ctrl-btn:hover { opacity: 1; transform: scale(1.1); }
         .edit-roster-btn { color: var(--text-main); }
+        .view-rounds-btn { color: var(--accent-red); font-weight: bold;}
         .delete-btn { color: var(--accent-red); }
 
         .history-note { font-size: 11px; color: #ffaa00; }
@@ -272,6 +270,10 @@
         .player-list-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-bottom: 1px solid #222; }
         .player-list-item:last-child { border-bottom: none; }
         .remove-player-btn { background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 16px; }
+
+        .rounds-list { text-align: left; max-height: 300px; overflow-y: auto; margin-bottom: 20px; background: #050000; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
+        .round-item { padding: 8px; border-bottom: 1px solid #222; font-size: 14px; display: flex; justify-content: space-between;}
+        .round-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -387,6 +389,14 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="viewRoundsModal">
+        <div class="modal-content">
+            <h3 style="margin-top:0; font-family:'Oswald'; text-transform:uppercase; color: var(--accent-red);">История раундов</h3>
+            <div class="rounds-list" id="roundsListContainer"></div>
+            <button class="modal-btn" onclick="document.getElementById('viewRoundsModal').style.display = 'none'">Закрыть</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -403,15 +413,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const matchesCollection = collection(db, "nfs_matches");
-        const rosterDocRef = doc(db, "nfs_settings", "roster"); // Документ с базой игроков
+        const rosterDocRef = doc(db, "nfs_settings", "roster");
 
         let currentEnemyGuild = "";
         let currentSessionRounds = [];
         let isSessionActive = false;
         let editingMatchId = null;
         let globalMatches = []; 
-        
-        let playerDatabase = []; // Будет загружаться из Firebase
+        let playerDatabase = [];
 
         window.updateLiveClock = function() {
             const now = new Date();
@@ -449,31 +458,27 @@
         }
         animateParticles();
 
-        // --- РАБОТА С БАЗОЙ ИГРОКОВ В FIREBASE ---
         async function loadPlayersFromFirebase() {
             try {
                 const docSnap = await getDoc(rosterDocRef);
                 if (docSnap.exists()) {
                     playerDatabase = docSnap.data().players || [];
                 } else {
-                    // Если базы нет, создаем дефолтную
                     playerDatabase = ["Игрок 1", "Игрок 2", "Игрок 3", "Игрок 4"];
                     await setDoc(rosterDocRef, { players: playerDatabase });
                 }
             } catch (e) {
                 console.error("Ошибка загрузки базы игроков: ", e);
-                // Запасной вариант, если нет интернета
                 playerDatabase = JSON.parse(localStorage.getItem('nfs_players')) || ["Игрок 1", "Игрок 2", "Игрок 3", "Игрок 4"];
             }
             updateRosterSelects();
             renderPlayerList();
         }
 
-        // Функция сохранения в облако
         async function savePlayersToFirebase() {
             try {
                 await setDoc(rosterDocRef, { players: playerDatabase });
-                localStorage.setItem('nfs_players', JSON.stringify(playerDatabase)); // Дублируем локально на всякий случай
+                localStorage.setItem('nfs_players', JSON.stringify(playerDatabase));
             } catch (e) {
                 console.error("Ошибка сохранения базы игроков: ", e);
                 alert("Ошибка! Не удалось сохранить список игроков в облако.");
@@ -536,7 +541,6 @@
             }
         }
 
-        // --- ОСТАЛЬНАЯ ЛОГИКА ---
         window.startSession = function() {
             document.getElementById('startScreen').style.display = 'none';
             isSessionActive = true;
@@ -641,6 +645,7 @@
                 scoreNfs: totalNfs,
                 scoreEnemy: totalEnemy,
                 rounds: currentSessionRounds.length,
+                roundsData: currentSessionRounds, // СОХРАНЯЕМ ИСТОРИЮ РАУНДОВ
                 isDrop: currentSessionRounds.some(r => r.isDrop),
                 roster: finalRoster
             };
@@ -682,6 +687,26 @@
             }
         };
 
+        window.viewRounds = function(id) {
+            let match = globalMatches.find(m => m.id === id);
+            if (match && match.roundsData) {
+                const container = document.getElementById('roundsListContainer');
+                container.innerHTML = '';
+                match.roundsData.forEach(round => {
+                    const div = document.createElement('div');
+                    div.className = 'round-item';
+                    div.innerHTML = `
+                        <span>${round.time} ${round.isDrop ? '(Не 8/8)' : ''}</span>
+                        <strong>${round.nfs} : ${round.enemy}</strong>
+                    `;
+                    container.appendChild(div);
+                });
+                document.getElementById('viewRoundsModal').style.display = 'flex';
+            } else {
+                alert("История раундов для этого матча недоступна (возможно, он был сохранен в старой версии сайта).");
+            }
+        }
+
         function loadFinishedHistory() {
             const q = query(matchesCollection, orderBy("timestamp", "desc"));
             onSnapshot(q, (snapshot) => {
@@ -704,6 +729,7 @@
                             <div class="history-roster">
                                 <span>Состав:</span> ${match.roster || 'Не указан'}
                                 <div class="history-controls">
+                                    <button class="ctrl-btn view-rounds-btn" onclick="viewRounds('${match.id}')">👁️ Раунды</button>
                                     <button class="ctrl-btn edit-roster-btn" onclick="openEditRoster('${match.id}')">✏️ Изменить</button>
                                     <button class="ctrl-btn delete-btn" onclick="deleteMatch('${match.id}')">🗑️ Удалить</button>
                                 </div>
@@ -717,7 +743,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadPlayersFromFirebase(); // Загружаем базу игроков при старте
+            await loadPlayersFromFirebase();
             loadFinishedHistory();
         });
     </script>
