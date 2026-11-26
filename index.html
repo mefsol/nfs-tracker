@@ -9,13 +9,13 @@
 
         :root {
             --bg-dark: #08080a;
-            --bg-panel: rgba(15, 10, 10, 0.85);
+            --bg-panel: rgba(20, 12, 12, 0.6); /* Стеклянный эффект */
             --text-main: #ffffff;
             --text-muted: #888888;
             --accent-red: #cc0000;
-            --accent-glow: rgba(204, 0, 0, 0.4);
-            --border-color: #2a1a1a;
-            --input-bg: #110a0a;
+            --accent-glow: rgba(204, 0, 0, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.4);
         }
 
         body {
@@ -49,14 +49,9 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(15px); /* Усиленный блюр */
+            border-right: 1px solid var(--border-color);
             overflow-y: auto;
-        }
-
-        .left-panel::after {
-            content: '';
-            position: absolute; right: 0; top: 10%; height: 80%; width: 1px;
-            background: linear-gradient(to bottom, transparent, var(--accent-red), transparent);
         }
 
         .start-screen {
@@ -64,17 +59,20 @@
             background: rgba(5, 0, 0, 0.95);
             display: flex; justify-content: center; align-items: center;
             z-index: 50;
+            backdrop-filter: blur(10px);
         }
 
         .start-btn {
             background: var(--accent-red); color: white;
             font-family: 'Oswald', sans-serif; font-size: 40px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 5px;
-            padding: 30px 80px; border: none; border-radius: 10px;
+            padding: 30px 80px; border: none;
+            /* Скошенные углы */
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
             cursor: pointer; box-shadow: 0 0 40px var(--accent-glow);
             transition: 0.3s;
         }
-        .start-btn:hover { background: #ff1a1a; transform: scale(1.05); }
+        .start-btn:hover { background: #ff1a1a; transform: scale(1.05); box-shadow: 0 0 60px var(--accent-glow); }
 
         .top-bar {
             display: flex; gap: 15px; margin-bottom: 10px;
@@ -83,17 +81,19 @@
 
         input[type="date"], input[type="time"] {
             font-family: 'Oswald', sans-serif; font-size: 20px;
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-main);
+            background: var(--input-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); color: var(--text-main);
             padding: 10px 20px; border-radius: 12px; outline: none;
             text-align: center; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .clock-display {
             font-family: 'Oswald', sans-serif; font-size: 20px;
-            background: rgba(204, 0, 0, 0.1); backdrop-filter: blur(10px);
-            border: 1px solid rgba(204, 0, 0, 0.3); color: var(--accent-red);
+            background: rgba(204, 0, 0, 0.15); backdrop-filter: blur(10px);
+            border: 1px solid rgba(204, 0, 0, 0.5); color: var(--accent-red);
             padding: 10px 20px; border-radius: 12px; font-weight: 700;
+            box-shadow: 0 0 15px rgba(204,0,0,0.2);
         }
 
         .player-manager { display: flex; justify-content: center; margin-bottom: 15px; }
@@ -101,9 +101,9 @@
             background: transparent; color: var(--text-muted);
             border: 1px solid var(--border-color); padding: 6px 15px;
             border-radius: 6px; font-size: 12px; cursor: pointer;
-            transition: 0.2s; font-family: 'Oswald', sans-serif; text-transform: uppercase;
+            transition: 0.3s; font-family: 'Oswald', sans-serif; text-transform: uppercase;
         }
-        .manage-btn:hover { color: var(--text-main); border-color: var(--accent-red); }
+        .manage-btn:hover { color: var(--text-main); border-color: var(--accent-red); box-shadow: 0 0 10px rgba(204,0,0,0.3); }
 
         .roster-block {
             display: flex; gap: 10px; justify-content: center;
@@ -111,36 +111,42 @@
         }
 
         .roster-col { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
-
         .select-row { display: flex; gap: 5px; }
-        
+
         select.roster-input {
             font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700;
-            background: #110a0a; border: 1px solid var(--border-color);
+            background: var(--input-bg); border: 1px solid var(--border-color);
             color: var(--text-main); padding: 8px 5px; border-radius: 6px;
             outline: none; text-align: center; transition: 0.3s;
             width: 100%; box-sizing: border-box; cursor: pointer;
             appearance: none; -webkit-appearance: none; -moz-appearance: none;
             text-align-last: center;
         }
-        select.roster-input:focus { border-color: var(--accent-red); background: rgba(204, 0, 0, 0.1); }
+        select.roster-input:focus { border-color: var(--accent-red); background: rgba(204, 0, 0, 0.1); box-shadow: 0 0 10px var(--accent-glow); }
         select.roster-input option { background: #110a0a; color: #fff; }
-        
-        .drop-btn {
-            background: #2a0a0a; border: 1px solid #550000; color: #ff4444;
-            border-radius: 6px; font-size: 18px; cursor: pointer; padding: 0 10px;
-            transition: 0.3s; font-weight: bold; display: flex; align-items: center; justify-content: center;
-        }
-        .drop-btn:hover { background: var(--accent-red); color: white; }
-        .drop-btn.active { background: var(--accent-red); color: white; box-shadow: 0 0 10px var(--accent-red); }
 
+        /* ТУМБЛЕР (Выпал) */
+        .drop-btn {
+            background: #1a0a0a; border: 2px solid #331111; color: #555;
+            border-radius: 6px; font-size: 18px; cursor: pointer; padding: 0 12px;
+            transition: 0.3s; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 5px black;
+        }
+        .drop-btn:hover { border-color: var(--accent-red); color: #ff4444; }
+        .drop-btn.active { background: var(--accent-red); color: white; box-shadow: 0 0 15px var(--accent-red); border-color: #ff1a1a; }
+
+        /* КРУГИ */
         .vs-container {
             display: flex; align-items: center; justify-content: space-evenly;
             flex: 1; margin: 0;
         }
 
+        .circle-wrapper {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+
         .guild-circle {
-            width: 300px; height: 300px; border-radius: 50%;
+            width: 260px; height: 260px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             text-align: center; font-family: 'Oswald', sans-serif;
             font-weight: 700; font-size: 36px; text-transform: uppercase;
@@ -152,7 +158,17 @@
         }
         .guild-circle.nfs { border-color: var(--accent-red); box-shadow: 0 0 40px var(--accent-glow), inset 0 0 40px rgba(204,0,0,0.2); }
         .guild-circle.enemy { cursor: pointer; }
-        .guild-circle.enemy:hover { border-color: var(--text-main); box-shadow: 0 0 40px rgba(255,255,255,0.2), inset 0 0 30px rgba(255,255,255,0.1); transform: scale(1.02); }
+        .guild-circle.enemy:hover { border-color: var(--text-main); box-shadow: 0 0 50px rgba(255,255,255,0.3), inset 0 0 30px rgba(255,255,255,0.1); transform: scale(1.02); }
+
+        /* ШКАЛА ПРОГРЕССА */
+        .progress-bar-bg {
+            width: 200px; height: 8px; background: #111; border-radius: 4px;
+            border: 1px solid #333; overflow: hidden; box-shadow: inset 0 0 5px black;
+        }
+        .progress-bar-fill {
+            height: 100%; width: 0%; background: linear-gradient(90deg, #550000, #ff1a1a);
+            transition: width 0.5s ease-out; box-shadow: 0 0 10px var(--accent-red);
+        }
 
         .vs-text {
             font-family: 'Oswald', sans-serif; font-size: 90px; font-weight: 700; font-style: italic;
@@ -160,60 +176,84 @@
             margin: 0 20px; z-index: 2;
         }
 
-        .score-container { display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 15px; }
+        /* СЧЕТ */
+        .score-container { display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 20px; }
         .score-block {
             display: flex; align-items: center; gap: 15px; background: var(--input-bg);
             padding: 10px 25px; border-radius: 12px; border: 1px solid var(--border-color);
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            /* Скошенные углы для блока счета */
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
         }
+        
         .score-input {
             width: 90px; font-family: 'Oswald', sans-serif; font-size: 65px; font-weight: 700;
             text-align: center; background: transparent; border: none; color: var(--text-main);
+            transition: transform 0.1s ease, color 0.2s;
         }
         .score-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-        .score-controls { display: flex; flex-direction: column; gap: 6px; }
-        .score-controls button {
-            background: #1a0a0a; border: 1px solid #331111; color: var(--text-main);
-            padding: 6px 12px; font-size: 16px; border-radius: 6px; cursor: pointer; transition: 0.2s;
-        }
-        .score-controls button:hover { background: var(--accent-red); border-color: var(--accent-red); }
-        .dash { font-family: 'Oswald', sans-serif; font-size: 65px; color: var(--border-color); }
+        
+        /* ПУЛЬСАЦИЯ */
+        .pulse-anim { transform: scale(1.2); color: var(--accent-red) !important; }
 
+        /* ТУМБЛЕРЫ ПЛЮС/МИНУС */
+        .score-controls { display: flex; flex-direction: column; gap: 8px; }
+        .score-controls button {
+            background: linear-gradient(180deg, #2a2a2a 0%, #111 100%);
+            border: 1px solid #444; border-bottom: 3px solid #000;
+            color: #fff; padding: 8px 15px; font-size: 18px; border-radius: 6px; 
+            cursor: pointer; transition: 0.1s;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+        }
+        .score-controls button:active {
+            border-bottom: 1px solid #000; transform: translateY(2px);
+            background: var(--accent-red); box-shadow: 0 0 15px var(--accent-glow);
+        }
+        .score-controls button:hover { border-color: var(--accent-red); }
+
+        .dash { font-family: 'Oswald', sans-serif; font-size: 65px; color: var(--text-muted); }
+
+        /* КНОПКИ ДЕЙСТВИЙ */
         .action-buttons { display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; }
         .row-actions { display: flex; gap: 15px; }
         
         .btn-save-round {
             flex: 2; background: #1a0a0a; color: white; font-family: 'Oswald', sans-serif;
             font-size: 18px; font-weight: 700; text-transform: uppercase; padding: 15px;
-            border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; border: 1px solid #331111;
+            border: 1px solid #331111; cursor: pointer; transition: 0.3s;
+            /* Скошенные углы */
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
         }
-        .btn-save-round:hover { background: #2a0a0a; border-color: var(--accent-red); box-shadow: 0 0 15px rgba(204,0,0,0.2); }
+        .btn-save-round:hover { background: #2a0a0a; border-color: var(--accent-red); box-shadow: 0 0 20px rgba(204,0,0,0.3); }
 
         .btn-checkbox {
             flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
-            background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px;
+            background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px;
             color: var(--text-muted); font-family: 'Oswald', sans-serif; font-size: 14px;
             text-transform: uppercase; cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
         }
         .btn-checkbox input { width: 18px; height: 18px; accent-color: var(--accent-red); }
 
         .btn-finish {
             background: var(--accent-red); color: white; font-family: 'Oswald', sans-serif;
             font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
-            padding: 15px; border: none; border-radius: 8px; cursor: pointer;
+            padding: 15px; border: none; cursor: pointer;
+            clip-path: polygon(2% 0, 98% 0, 100% 100%, 0% 100%);
             box-shadow: 0 5px 15px var(--accent-glow); transition: 0.3s;
         }
-        .btn-finish:hover { background: #ff1a1a; box-shadow: 0 10px 25px var(--accent-glow); }
+        .btn-finish:hover { background: #ff1a1a; box-shadow: 0 10px 30px var(--accent-glow); }
 
+        /* ПРАВАЯ ПАНЕЛЬ */
         .right-panel {
-            width: 400px; background: var(--bg-panel); backdrop-filter: blur(10px);
+            width: 420px; background: rgba(10, 5, 5, 0.7); backdrop-filter: blur(15px);
             border-left: 1px solid var(--border-color); display: flex; flex-direction: column;
             overflow: hidden; box-shadow: -10px 0 30px rgba(0,0,0,0.8);
         }
 
         .history-section { padding: 20px 25px; display: flex; flex-direction: column; overflow-y: auto; }
         .history-section.current { flex: 1; border-bottom: 1px solid var(--border-color); }
-        .history-section.finished { flex: 1.5; background: rgba(0,0,0,0.4); }
+        .history-section.finished { flex: 1.5; background: rgba(0,0,0,0.5); }
 
         .history-title {
             font-family: 'Oswald', sans-serif; font-size: 20px; font-weight: 700;
@@ -222,51 +262,60 @@
         }
         .history-title::before {
             content: ''; display: block; width: 6px; height: 20px;
-            background: var(--accent-red); border-radius: 2px;
+            background: var(--accent-red); border-radius: 2px; box-shadow: 0 0 10px var(--accent-red);
         }
-        .finished .history-title::before { background: var(--text-muted); }
 
         .history-item {
-            background: rgba(20, 10, 10, 0.8); border: 1px solid #331111;
+            background: rgba(20, 10, 10, 0.6); border: 1px solid var(--border-color);
             border-left: 3px solid var(--accent-red); padding: 12px 15px;
             margin-bottom: 10px; border-radius: 4px 8px 8px 4px;
-            display: flex; justify-content: space-between; align-items: center; position: relative;
-            transition: all 0.3s ease;
+            display: flex; flex-direction: column; position: relative;
+            transition: all 0.3s ease; backdrop-filter: blur(5px);
         }
-        .history-item:hover { 
-            background: rgba(35, 15, 15, 0.9); 
-            box-shadow: 0 0 15px rgba(204, 0, 0, 0.15);
-            transform: translateX(-3px);
-        }
-        .finished .history-item { border-left: 3px solid #444; background: #0d0505; cursor: pointer;}
-        .finished .history-item:hover { background: #150808; border-left-color: var(--accent-red); }
+        .history-item:hover { background: rgba(35, 15, 15, 0.8); box-shadow: 0 0 15px rgba(204, 0, 0, 0.2); }
 
-        .history-info { display: flex; flex-direction: column; gap: 4px; width: 100%;}
+        /* АККОРДЕОН (Скрытая часть) */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 500px; /* Достаточно для контента */
+            margin-top: 10px;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+
+        .history-main-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; width: 100%; }
+        
+        .history-info { display: flex; flex-direction: column; gap: 4px; }
         .history-date { font-size: 11px; color: var(--text-muted); font-family: 'Oswald', sans-serif; }
         .history-matchup { font-size: 16px; font-weight: 700; text-transform: uppercase; }
+        .history-note { font-size: 11px; color: #ffaa00; }
         
-        .history-roster {
-            font-size: 11px; color: #aaa; margin-top: 4px; line-height: 1.3;
-        }
+        .history-roster { font-size: 12px; color: #aaa; line-height: 1.4; margin-bottom: 10px; }
         .history-roster span { color: var(--text-main); font-weight: 700; }
         .dropped { color: #ff4444 !important; text-decoration: line-through; }
         
-        .history-controls { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+        .history-controls { display: flex; gap: 5px; flex-wrap: wrap; }
         .ctrl-btn {
-            background: none; border: none; cursor: pointer; font-size: 12px;
-            padding: 2px 5px; opacity: 0.6; transition: 0.2s;
+            background: rgba(0,0,0,0.5); border: 1px solid #333; cursor: pointer; font-size: 12px;
+            padding: 4px 8px; border-radius: 4px; transition: 0.2s; color: white;
         }
-        .ctrl-btn:hover { opacity: 1; transform: scale(1.1); }
-        .edit-roster-btn { color: var(--text-main); }
-        .delete-btn { color: var(--accent-red); }
+        .ctrl-btn:hover { background: var(--accent-red); border-color: var(--accent-red); }
 
-        .history-note { font-size: 11px; color: #ffaa00; }
-        
         .history-score {
             font-family: 'Oswald', sans-serif; font-size: 26px; font-weight: 700;
-            color: var(--text-main); white-space: nowrap; margin-left: 10px;
+            color: var(--text-main); white-space: nowrap;
         }
 
+        /* ИКОНКИ */
+        .icon-win { color: #ffd700; text-shadow: 0 0 10px #ffd700; }
+        .icon-lose { color: #888; }
+        .icon-fire { color: #ff4400; text-shadow: 0 0 10px #ff4400; }
+
+        /* МОДАЛКИ */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
@@ -276,6 +325,7 @@
             background: #110505; padding: 30px; border-radius: 12px;
             border: 1px solid #331111; border-top: 3px solid var(--accent-red);
             width: 350px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
         .modal-input {
             width: 100%; box-sizing: border-box; font-family: 'Oswald', sans-serif;
@@ -283,11 +333,12 @@
             color: var(--text-main); padding: 12px; border-radius: 8px;
             margin-bottom: 20px; text-align: center; text-transform: uppercase; outline: none;
         }
-        .modal-input:focus { border-color: var(--accent-red); }
+        .modal-input:focus { border-color: var(--accent-red); box-shadow: 0 0 10px var(--accent-glow); }
         .modal-btn {
             background: var(--accent-red); color: white; font-family: 'Oswald', sans-serif;
             font-size: 18px; font-weight: 700; text-transform: uppercase; padding: 12px;
             border: none; border-radius: 6px; cursor: pointer; width: 100%;
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
         }
         
         .player-list { text-align: left; max-height: 200px; overflow-y: auto; margin-bottom: 20px; background: #050000; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; }
@@ -322,6 +373,7 @@
         }
         footer a:hover {
             color: var(--accent-red);
+            text-shadow: 0 0 10px var(--accent-red);
         }
     </style>
 </head>
@@ -349,37 +401,46 @@
                 <div class="roster-col">
                     <div class="select-row">
                         <select class="roster-input" id="player1"><option value="">Игрок 1</option></select>
-                        <button class="drop-btn" onclick="toggleDrop(this, 1)">➖</button>
+                        <button class="drop-btn" onclick="toggleDrop(this, 1)" title="Отметить выпавшего">➖</button>
                     </div>
                     <select class="roster-input" id="player1_sub"><option value="">Замена</option></select>
                 </div>
                 <div class="roster-col">
                     <div class="select-row">
                         <select class="roster-input" id="player2"><option value="">Игрок 2</option></select>
-                        <button class="drop-btn" onclick="toggleDrop(this, 2)">➖</button>
+                        <button class="drop-btn" onclick="toggleDrop(this, 2)" title="Отметить выпавшего">➖</button>
                     </div>
                     <select class="roster-input" id="player2_sub"><option value="">Замена</option></select>
                 </div>
                 <div class="roster-col">
                     <div class="select-row">
                         <select class="roster-input" id="player3"><option value="">Игрок 3</option></select>
-                        <button class="drop-btn" onclick="toggleDrop(this, 3)">➖</button>
+                        <button class="drop-btn" onclick="toggleDrop(this, 3)" title="Отметить выпавшего">➖</button>
                     </div>
                     <select class="roster-input" id="player3_sub"><option value="">Замена</option></select>
                 </div>
                 <div class="roster-col">
                     <div class="select-row">
                         <select class="roster-input" id="player4"><option value="">Игрок 4</option></select>
-                        <button class="drop-btn" onclick="toggleDrop(this, 4)">➖</button>
+                        <button class="drop-btn" onclick="toggleDrop(this, 4)" title="Отметить выпавшего">➖</button>
                     </div>
                     <select class="roster-input" id="player4_sub"><option value="">Замена</option></select>
                 </div>
             </div>
 
+            <!-- ЗОНА КРУГОВ И ШКАЛ -->
             <div class="vs-container">
-                <div class="guild-circle nfs">Need for Speed</div>
+                <div class="circle-wrapper">
+                    <div class="guild-circle nfs">Need for Speed</div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-nfs"></div></div>
+                </div>
+                
                 <div class="vs-text">VS</div>
-                <div class="guild-circle enemy" id="enemy-guild-display" onclick="openModal()">ВЫБРАТЬ ВРАГА</div>
+                
+                <div class="circle-wrapper">
+                    <div class="guild-circle enemy" id="enemy-guild-display" onclick="openModal()">ВЫБРАТЬ ВРАГА</div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-enemy"></div></div>
+                </div>
             </div>
 
             <div class="score-container">
@@ -428,6 +489,7 @@
         Author: mefsol
     </footer>
 
+    <!-- МОДАЛКИ -->
     <div class="modal-overlay" id="guildModal">
         <div class="modal-content">
             <h3 style="margin-top:0; font-family:'Oswald'; text-transform:uppercase;">Гильдия врага</h3>
@@ -514,7 +576,7 @@
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 100; i++) {
             particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, radius: Math.random() * 1.5 + 0.5, speedY: Math.random() * 0.4 + 0.1, opacity: Math.random() * 0.5 + 0.1, pulse: Math.random() * 0.02 + 0.01 });
         }
         function animateParticles() {
@@ -529,6 +591,26 @@
             requestAnimationFrame(animateParticles);
         }
         animateParticles();
+
+        // --- ЛОГИКА ПУЛЬСАЦИИ СЧЕТА ---
+        function pulseScore(id) {
+            const el = document.getElementById(id);
+            el.classList.add('pulse-anim');
+            setTimeout(() => el.classList.remove('pulse-anim'), 150);
+            updateProgressBars();
+        }
+
+        function updateProgressBars() {
+            const scoreNfs = parseInt(document.getElementById('score-nfs').value) || 0;
+            const scoreEnemy = parseInt(document.getElementById('score-enemy').value) || 0;
+            
+            // Прогресс до 8 побед (можно поменять на 10/15)
+            let pctNfs = Math.min((scoreNfs / 8) * 100, 100);
+            let pctEnemy = Math.min((scoreEnemy / 8) * 100, 100);
+
+            document.getElementById('progress-nfs').style.width = `${pctNfs}%`;
+            document.getElementById('progress-enemy').style.width = `${pctEnemy}%`;
+        }
 
         async function loadPlayersFromFirebase() {
             try {
@@ -613,7 +695,6 @@
             }
         }
 
-        // Переключение статуса "Выпал"
         window.toggleDrop = function(btn, playerIndex) {
             droppedState[playerIndex] = !droppedState[playerIndex];
             if (droppedState[playerIndex]) {
@@ -628,6 +709,8 @@
             isSessionActive = true;
             document.getElementById('score-nfs').value = 0;
             document.getElementById('score-enemy').value = 0;
+            updateProgressBars();
+            
             currentSessionRounds = [];
             document.getElementById('current-history-list').innerHTML = '';
             const display = document.getElementById('enemy-guild-display');
@@ -635,7 +718,6 @@
             display.style.fontSize = '36px';
             currentEnemyGuild = "";
             
-            // Сброс кнопок "Выпал"
             droppedState = { 1: false, 2: false, 3: false, 4: false };
             document.querySelectorAll('.drop-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -668,6 +750,7 @@
             val += amount;
             if (val < 0) val = 0;
             el.value = val;
+            pulseScore(id);
         };
 
         window.clearRoster = function() {
@@ -677,21 +760,6 @@
             }
         };
         function getRosterString() {
-            let roster = [];
-            for (let i = 1; i <= 4; i++) {
-                let name = document.getElementById(`player${i}`).value;
-                let sub = document.getElementById(`player${i}_sub`).value;
-                if (name) {
-                    let text = name;
-                    if (droppedState[i]) text = `<span class="dropped">${name}</span>`;
-                    if (sub) text += ` (замена: ${sub})`;
-                    roster.push(text);
-                }
-            }
-            return roster.join(', ');
-        }
-        
-        function getRosterHTML() {
             let roster = [];
             for (let i = 1; i <= 4; i++) {
                 let name = document.getElementById(`player${i}`).value;
@@ -717,27 +785,12 @@
             const now = new Date();
             const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
-            const rosterString = getRosterString(); // Для базы данных
-            const rosterHTML = getRosterHTML(); // Для отображения
+            const rosterString = getRosterString();
             
             const roundData = { time: timeString, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
             currentSessionRounds.unshift(roundData);
+            renderCurrentRounds();
             
-            const list = document.getElementById('current-history-list');
-            const item = document.createElement('div');
-            item.className = 'history-item';
-            item.innerHTML = `
-                <div class="history-info">
-                    <div class="history-date">${timeString}</div>
-                    ${isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
-                    ${rosterHTML ? `<div class="history-roster"><span>Состав:</span> ${rosterHTML}</div>` : ''}
-                </div>
-                <div style="display:flex; align-items:center;">
-                    <div class="history-score">${scoreNfs} : ${scoreEnemy}</div>
-                    <button class="ctrl-btn delete-btn" style="font-size:16px; margin-left:10px;" onclick="removeCurrentRound(${currentSessionRounds.length - 1})">🗑️</button>
-                </div>
-            `;
-            list.prepend(item);
             document.getElementById('player-drop').checked = false;
         };
 
@@ -753,15 +806,17 @@
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 item.innerHTML = `
-                    <div class="history-info">
-                        <div class="history-date">${round.time}</div>
-                        ${round.isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
-                        ${round.roster ? `<div class="history-roster"><span>Состав:</span> ${round.roster}</div>` : ''}
+                    <div style="display:flex; justify-content:space-between; width:100%;">
+                        <div class="history-info">
+                            <div class="history-date">${round.time}</div>
+                            ${round.isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <div class="history-score">${round.nfs} : ${round.enemy}</div>
+                            <button class="ctrl-btn delete-btn" style="font-size:16px; margin-left:10px;" onclick="removeCurrentRound(${index})">🗑️</button>
+                        </div>
                     </div>
-                    <div style="display:flex; align-items:center;">
-                        <div class="history-score">${round.nfs} : ${round.enemy}</div>
-                        <button class="ctrl-btn delete-btn" style="font-size:16px; margin-left:10px;" onclick="removeCurrentRound(${index})">🗑️</button>
-                    </div>
+                    ${round.roster ? `<div class="history-roster" style="margin-top:8px;"><span>Состав:</span> ${round.roster}</div>` : ''}
                 `;
                 list.appendChild(item);
             });
@@ -784,7 +839,7 @@
                 scoreNfs: totalNfs,
                 scoreEnemy: totalEnemy,
                 rounds: currentSessionRounds.length,
-                roundsData: currentSessionRounds, // СОХРАНЯЕМ ИСТОРИЮ РАУНДОВ
+                roundsData: currentSessionRounds,
                 isDrop: currentSessionRounds.some(r => r.isDrop),
                 roster: finalRoster
             };
@@ -802,7 +857,6 @@
             editingMatchId = id;
             let match = globalMatches.find(m => m.id === id);
             if (match) {
-                // Убираем HTML теги для редактирования
                 let cleanRoster = match.roster.replace(/<[^>]*>/g, '');
                 document.getElementById('editRosterInput').value = cleanRoster || '';
                 document.getElementById('editRosterModal').style.display = 'flex';
@@ -851,6 +905,23 @@
             }
         }
 
+        // --- АККОРДЕОН ---
+        window.toggleAccordion = function(event, id) {
+            // Предотвращаем открытие, если кликнули на кнопку внутри
+            if (event.target.tagName === 'BUTTON') return;
+            
+            const content = document.getElementById(`acc-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.innerText = '▼';
+            } else {
+                content.classList.add('open');
+                icon.innerText = '▲';
+            }
+        }
+
         function loadFinishedHistory() {
             const q = query(matchesCollection, orderBy("timestamp", "desc"));
             onSnapshot(q, (snapshot) => {
@@ -861,29 +932,41 @@
                     const match = docSnap.data();
                     match.id = docSnap.id; 
                     globalMatches.push(match);
+                    
                     const item = document.createElement('div');
                     item.className = 'history-item';
-                    item.onclick = (e) => {
-                        if (e.target.tagName === 'BUTTON') return;
-                        window.viewRounds(match.id);
-                    };
                     
                     const dateObj = new Date(match.date);
                     const formattedDate = dateObj.toLocaleDateString('ru-RU');
+                    
+                    let winIcon = "";
+                    if (match.scoreNfs > match.scoreEnemy) winIcon = '<span class="icon-win">🏆</span>';
+                    else if (match.scoreNfs < match.scoreEnemy) winIcon = '<span class="icon-lose">💀</span>';
+                    else winIcon = '<span class="icon-fire">🔥</span>';
+                    
                     item.innerHTML = `
-                        <div class="history-info">
-                            <div class="history-date">${formattedDate} (${match.rounds} р.)</div>
-                            <div class="history-matchup">NFS vs ${match.enemy}</div>
-                            ${match.isDrop ? '<div class="history-note">Были вылеты</div>' : ''}
-                            <div class="history-roster">
-                                <span>Состав:</span> ${match.roster || 'Не указан'}
-                                <div class="history-controls">
-                                    <button class="ctrl-btn edit-roster-btn" onclick="openEditRoster('${match.id}')">✏️ Изменить</button>
-                                    <button class="ctrl-btn delete-btn" onclick="deleteMatch('${match.id}')">🗑️ Удалить</button>
-                                </div>
+                        <div class="history-main-row" onclick="toggleAccordion(event, '${match.id}')">
+                            <div class="history-info">
+                                <div class="history-date">${formattedDate} (${match.rounds} р.)</div>
+                                <div class="history-matchup">${winIcon} NFS vs ${match.enemy}</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div class="history-score">${match.scoreNfs} : ${match.scoreEnemy}</div>
+                                <div id="icon-${match.id}" style="color:#666; font-size:12px;">▼</div>
                             </div>
                         </div>
-                        <div class="history-score">${match.scoreNfs} : ${match.scoreEnemy}</div>
+                        <!-- Скрытый контент (Аккордеон) -->
+                        <div class="accordion-content" id="acc-${match.id}">
+                            ${match.isDrop ? '<div class="history-note">Были вылеты</div>' : ''}
+                            <div class="history-roster" style="margin-top:10px;">
+                                <span>Состав:</span> ${match.roster || 'Не указан'}
+                            </div>
+                            <div class="history-controls">
+                                <button class="ctrl-btn edit-roster-btn" onclick="openEditRoster('${match.id}')">✏️ Изменить</button>
+                                <button class="ctrl-btn" onclick="viewRounds('${match.id}')">👁️ Раунды</button>
+                                <button class="ctrl-btn delete-btn" onclick="deleteMatch('${match.id}')">🗑️ Удалить</button>
+                            </div>
+                        </div>
                     `;
                     historyList.appendChild(item);
                 });
