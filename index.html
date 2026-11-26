@@ -24,6 +24,7 @@
             color: var(--text-main);
             font-family: 'Montserrat', sans-serif;
             display: flex;
+            flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
@@ -34,13 +35,20 @@
             z-index: 0; pointer-events: none;
         }
 
+        .main-content {
+            display: flex;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
         .left-panel {
             flex: 1.5;
             padding: 25px 40px;
             display: flex;
             flex-direction: column;
             position: relative;
-            z-index: 1;
             backdrop-filter: blur(5px);
             overflow-y: auto;
         }
@@ -191,7 +199,7 @@
         .right-panel {
             width: 400px; background: var(--bg-panel); backdrop-filter: blur(10px);
             border-left: 1px solid var(--border-color); display: flex; flex-direction: column;
-            overflow: hidden; z-index: 1; box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+            overflow: hidden; box-shadow: -10px 0 30px rgba(0,0,0,0.8);
         }
 
         .history-section { padding: 20px 25px; display: flex; flex-direction: column; overflow-y: auto; }
@@ -214,11 +222,10 @@
             border-left: 3px solid var(--accent-red); padding: 12px 15px;
             margin-bottom: 10px; border-radius: 4px 8px 8px 4px;
             display: flex; justify-content: space-between; align-items: center; position: relative;
-            cursor: pointer;
             transition: background 0.2s;
         }
         .history-item:hover { background: rgba(30, 15, 15, 0.9); }
-        .finished .history-item { border-left: 3px solid #444; background: #0d0505; }
+        .finished .history-item { border-left: 3px solid #444; background: #0d0505; cursor: pointer;}
         .finished .history-item:hover { background: #150808; }
 
         .history-info { display: flex; flex-direction: column; gap: 4px; width: 100%;}
@@ -281,91 +288,119 @@
         .round-time { font-size: 12px; color: var(--text-main); font-family: 'Oswald', sans-serif; font-weight: 700;}
         .round-roster { font-size: 11px; color: #aaa; }
         .round-score { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; white-space: nowrap; }
+
+        /* ФУТЕР */
+        footer {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 10;
+            text-align: right;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
+        }
+        footer a {
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer a:hover {
+            color: var(--accent-red);
+        }
     </style>
 </head>
 <body>
 
     <canvas id="stars-canvas"></canvas>
-
-    <div class="left-panel">
-        <div class="start-screen" id="startScreen">
-            <button class="start-btn" onclick="startSession()">НАЧАТЬ СТАК</button>
-        </div>
-
-        <div class="top-bar">
-            <input type="date" id="match-date">
-            <input type="time" id="match-time">
-            <div class="clock-display" id="live-clock">00:00:00</div>
-        </div>
-
-        <div class="player-manager">
-            <button class="manage-btn" onclick="openPlayerManager()">⚙️ Настроить базу игроков</button>
-        </div>
-
-        <div class="roster-block">
-            <div class="roster-col">
-                <select class="roster-input" id="player1"><option value="">Игрок 1</option></select>
-                <select class="roster-input roster-sub-input" id="player1_sub"><option value="">Замена</option></select>
+    
+    <div class="main-content">
+        <div class="left-panel">
+            <div class="start-screen" id="startScreen">
+                <button class="start-btn" onclick="startSession()">НАЧАТЬ СТАК</button>
             </div>
-            <div class="roster-col">
-                <select class="roster-input" id="player2"><option value="">Игрок 2</option></select>
-                <select class="roster-input roster-sub-input" id="player2_sub"><option value="">Замена</option></select>
-            </div>
-            <div class="roster-col">
-                <select class="roster-input" id="player3"><option value="">Игрок 3</option></select>
-                <select class="roster-input roster-sub-input" id="player3_sub"><option value="">Замена</option></select>
-            </div>
-            <div class="roster-col">
-                <select class="roster-input" id="player4"><option value="">Игрок 4</option></select>
-                <select class="roster-input roster-sub-input" id="player4_sub"><option value="">Замена</option></select>
-            </div>
-        </div>
 
-        <div class="vs-container">
-            <div class="guild-circle nfs">Need for Speed</div>
-            <div class="vs-text">VS</div>
-            <div class="guild-circle enemy" id="enemy-guild-display" onclick="openModal()">ВЫБРАТЬ ВРАГА</div>
-        </div>
+            <div class="top-bar">
+                <input type="date" id="match-date">
+                <input type="time" id="match-time">
+                <div class="clock-display" id="live-clock">00:00:00</div>
+            </div>
 
-        <div class="score-container">
-            <div class="score-block">
-                <input type="number" id="score-nfs" class="score-input" value="0" min="0">
-                <div class="score-controls">
-                    <button onclick="changeScore('score-nfs', 1)">▲</button>
-                    <button onclick="changeScore('score-nfs', -1)">▼</button>
+            <div class="player-manager">
+                <button class="manage-btn" onclick="openPlayerManager()">⚙️ Настроить базу игроков</button>
+            </div>
+
+            <div class="roster-block">
+                <div class="roster-col">
+                    <select class="roster-input" id="player1"><option value="">Игрок 1</option></select>
+                    <select class="roster-input roster-sub-input" id="player1_sub"><option value="">Замена</option></select>
+                </div>
+                <div class="roster-col">
+                    <select class="roster-input" id="player2"><option value="">Игрок 2</option></select>
+                    <select class="roster-input roster-sub-input" id="player2_sub"><option value="">Замена</option></select>
+                </div>
+                <div class="roster-col">
+                    <select class="roster-input" id="player3"><option value="">Игрок 3</option></select>
+                    <select class="roster-input roster-sub-input" id="player3_sub"><option value="">Замена</option></select>
+                </div>
+                <div class="roster-col">
+                    <select class="roster-input" id="player4"><option value="">Игрок 4</option></select>
+                    <select class="roster-input roster-sub-input" id="player4_sub"><option value="">Замена</option></select>
                 </div>
             </div>
-            <div class="dash">:</div>
-            <div class="score-block">
-                <div class="score-controls">
-                    <button onclick="changeScore('score-enemy', 1)">▲</button>
-                    <button onclick="changeScore('score-enemy', -1)">▼</button>
+
+            <div class="vs-container">
+                <div class="guild-circle nfs">Need for Speed</div>
+                <div class="vs-text">VS</div>
+                <div class="guild-circle enemy" id="enemy-guild-display" onclick="openModal()">ВЫБРАТЬ ВРАГА</div>
+            </div>
+
+            <div class="score-container">
+                <div class="score-block">
+                    <input type="number" id="score-nfs" class="score-input" value="0" min="0">
+                    <div class="score-controls">
+                        <button onclick="changeScore('score-nfs', 1)">▲</button>
+                        <button onclick="changeScore('score-nfs', -1)">▼</button>
+                    </div>
                 </div>
-                <input type="number" id="score-enemy" class="score-input" value="0" min="0">
+                <div class="dash">:</div>
+                <div class="score-block">
+                    <div class="score-controls">
+                        <button onclick="changeScore('score-enemy', 1)">▲</button>
+                        <button onclick="changeScore('score-enemy', -1)">▼</button>
+                    </div>
+                    <input type="number" id="score-enemy" class="score-input" value="0" min="0">
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <div class="row-actions">
+                    <button class="btn-save-round" onclick="saveRound()">СОХРАНИТЬ РАУНД</button>
+                    <label class="btn-checkbox">
+                        <input type="checkbox" id="player-drop"> Не 8/8
+                    </label>
+                </div>
+                <button class="btn-finish" onclick="finishMatch()">ЗАКОНЧИТЬ МАТЧ</button>
             </div>
         </div>
 
-        <div class="action-buttons">
-            <div class="row-actions">
-                <button class="btn-save-round" onclick="saveRound()">СОХРАНИТЬ РАУНД</button>
-                <label class="btn-checkbox">
-                    <input type="checkbox" id="player-drop"> Не 8/8
-                </label>
+        <div class="right-panel">
+            <div class="history-section current">
+                <div class="history-title">Текущий стак</div>
+                <div id="current-history-list"></div>
             </div>
-            <button class="btn-finish" onclick="finishMatch()">ЗАКОНЧИТЬ МАТЧ</button>
+            <div class="history-section finished">
+                <div class="history-title">Завершенные матчи</div>
+                <div id="finished-history-list"></div>
+            </div>
         </div>
     </div>
 
-    <div class="right-panel">
-        <div class="history-section current">
-            <div class="history-title">Текущий стак</div>
-            <div id="current-history-list"></div>
-        </div>
-        <div class="history-section finished">
-            <div class="history-title">Завершенные матчи</div>
-            <div id="finished-history-list"></div>
-        </div>
-    </div>
+    <footer>
+        &copy; 2026 Need For Speed<br>
+        Author: <a href="https://vk.ru/need_for_speedl" target="_blank">mefsol</a>
+    </footer>
 
     <div class="modal-overlay" id="guildModal">
         <div class="modal-content">
@@ -428,8 +463,6 @@
         let editingMatchId = null;
         let globalMatches = []; 
         let playerDatabase = [];
-
-        let sessionStartTime = null; // Время старта стака
 
         window.updateLiveClock = function() {
             const now = new Date();
@@ -554,7 +587,6 @@
         window.startSession = function() {
             document.getElementById('startScreen').style.display = 'none';
             isSessionActive = true;
-            sessionStartTime = Date.now(); // Засекаем время старта стака
             document.getElementById('score-nfs').value = 0;
             document.getElementById('score-enemy').value = 0;
             currentSessionRounds = [];
@@ -621,28 +653,42 @@
             const isDrop = document.getElementById('player-drop').checked;
             if (scoreNfs === 0 && scoreEnemy === 0) { alert('Счет 0:0, нечего сохранять.'); return; }
             
-            // Считаем время с момента старта
-            const elapsedMs = Date.now() - sessionStartTime;
-            const elapsedMin = Math.floor(elapsedMs / 60000);
-            const timeString = `+${elapsedMin} мин.`; 
+            const now = new Date();
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
             const rosterString = getRosterString();
             const roundData = { time: timeString, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
             currentSessionRounds.unshift(roundData);
-            const list = document.getElementById('current-history-list');
-            const item = document.createElement('div');
-            item.className = 'history-item';
-            item.innerHTML = `
-                <div class="history-info">
-                    <div class="history-date">Раунд ${timeString}</div>
-                    ${isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
-                    ${rosterString ? `<div class="history-roster"><span>Состав:</span> ${rosterString}</div>` : ''}
-                </div>
-                <div class="history-score">${scoreNfs} : ${scoreEnemy}</div>
-            `;
-            list.prepend(item);
+            renderCurrentRounds();
+            
             document.getElementById('player-drop').checked = false;
         };
+
+        window.removeCurrentRound = function(index) {
+            currentSessionRounds.splice(index, 1);
+            renderCurrentRounds();
+        }
+
+        function renderCurrentRounds() {
+            const list = document.getElementById('current-history-list');
+            list.innerHTML = '';
+            currentSessionRounds.forEach((round, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div class="history-info">
+                        <div class="history-date">${round.time}</div>
+                        ${round.isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
+                        ${round.roster ? `<div class="history-roster"><span>Состав:</span> ${round.roster}</div>` : ''}
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        <div class="history-score">${round.nfs} : ${round.enemy}</div>
+                        <button class="ctrl-btn delete-btn" style="font-size:16px; margin-left:10px;" onclick="removeCurrentRound(${index})">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
 
         window.finishMatch = async function() {
             if (!isSessionActive) return;
