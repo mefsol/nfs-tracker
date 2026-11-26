@@ -112,6 +112,8 @@
 
         .roster-col { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
 
+        .select-row { display: flex; gap: 5px; }
+        
         select.roster-input {
             font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700;
             background: #110a0a; border: 1px solid var(--border-color);
@@ -123,7 +125,14 @@
         }
         select.roster-input:focus { border-color: var(--accent-red); background: rgba(204, 0, 0, 0.1); }
         select.roster-input option { background: #110a0a; color: #fff; }
-        select.roster-sub-input { background: #0d0505; border: 1px dashed #333; color: #aaa; font-size: 11px; }
+        
+        .drop-btn {
+            background: #2a0a0a; border: 1px solid #550000; color: #ff4444;
+            border-radius: 6px; font-size: 18px; cursor: pointer; padding: 0 10px;
+            transition: 0.3s; font-weight: bold; display: flex; align-items: center; justify-content: center;
+        }
+        .drop-btn:hover { background: var(--accent-red); color: white; }
+        .drop-btn.active { background: var(--accent-red); color: white; box-shadow: 0 0 10px var(--accent-red); }
 
         .vs-container {
             display: flex; align-items: center; justify-content: space-evenly;
@@ -178,7 +187,7 @@
             font-size: 18px; font-weight: 700; text-transform: uppercase; padding: 15px;
             border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; border: 1px solid #331111;
         }
-        .btn-save-round:hover { background: #2a0a0a; border-color: var(--accent-red); }
+        .btn-save-round:hover { background: #2a0a0a; border-color: var(--accent-red); box-shadow: 0 0 15px rgba(204,0,0,0.2); }
 
         .btn-checkbox {
             flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -222,11 +231,15 @@
             border-left: 3px solid var(--accent-red); padding: 12px 15px;
             margin-bottom: 10px; border-radius: 4px 8px 8px 4px;
             display: flex; justify-content: space-between; align-items: center; position: relative;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
         }
-        .history-item:hover { background: rgba(30, 15, 15, 0.9); }
+        .history-item:hover { 
+            background: rgba(35, 15, 15, 0.9); 
+            box-shadow: 0 0 15px rgba(204, 0, 0, 0.15);
+            transform: translateX(-3px);
+        }
         .finished .history-item { border-left: 3px solid #444; background: #0d0505; cursor: pointer;}
-        .finished .history-item:hover { background: #150808; }
+        .finished .history-item:hover { background: #150808; border-left-color: var(--accent-red); }
 
         .history-info { display: flex; flex-direction: column; gap: 4px; width: 100%;}
         .history-date { font-size: 11px; color: var(--text-muted); font-family: 'Oswald', sans-serif; }
@@ -236,6 +249,7 @@
             font-size: 11px; color: #aaa; margin-top: 4px; line-height: 1.3;
         }
         .history-roster span { color: var(--text-main); font-weight: 700; }
+        .dropped { color: #ff4444 !important; text-decoration: line-through; }
         
         .history-controls { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
         .ctrl-btn {
@@ -333,20 +347,32 @@
 
             <div class="roster-block">
                 <div class="roster-col">
-                    <select class="roster-input" id="player1"><option value="">Игрок 1</option></select>
-                    <select class="roster-input roster-sub-input" id="player1_sub"><option value="">Замена</option></select>
+                    <div class="select-row">
+                        <select class="roster-input" id="player1"><option value="">Игрок 1</option></select>
+                        <button class="drop-btn" onclick="toggleDrop(this, 1)">➖</button>
+                    </div>
+                    <select class="roster-input" id="player1_sub"><option value="">Замена</option></select>
                 </div>
                 <div class="roster-col">
-                    <select class="roster-input" id="player2"><option value="">Игрок 2</option></select>
-                    <select class="roster-input roster-sub-input" id="player2_sub"><option value="">Замена</option></select>
+                    <div class="select-row">
+                        <select class="roster-input" id="player2"><option value="">Игрок 2</option></select>
+                        <button class="drop-btn" onclick="toggleDrop(this, 2)">➖</button>
+                    </div>
+                    <select class="roster-input" id="player2_sub"><option value="">Замена</option></select>
                 </div>
                 <div class="roster-col">
-                    <select class="roster-input" id="player3"><option value="">Игрок 3</option></select>
-                    <select class="roster-input roster-sub-input" id="player3_sub"><option value="">Замена</option></select>
+                    <div class="select-row">
+                        <select class="roster-input" id="player3"><option value="">Игрок 3</option></select>
+                        <button class="drop-btn" onclick="toggleDrop(this, 3)">➖</button>
+                    </div>
+                    <select class="roster-input" id="player3_sub"><option value="">Замена</option></select>
                 </div>
                 <div class="roster-col">
-                    <select class="roster-input" id="player4"><option value="">Игрок 4</option></select>
-                    <select class="roster-input roster-sub-input" id="player4_sub"><option value="">Замена</option></select>
+                    <div class="select-row">
+                        <select class="roster-input" id="player4"><option value="">Игрок 4</option></select>
+                        <button class="drop-btn" onclick="toggleDrop(this, 4)">➖</button>
+                    </div>
+                    <select class="roster-input" id="player4_sub"><option value="">Замена</option></select>
                 </div>
             </div>
 
@@ -398,8 +424,8 @@
     </div>
 
     <footer>
-        &copy; 2026 Need For Speed<br>
-        Author: <a href="https://vk.ru/need_for_speedl" target="_blank">mefsol</a>
+        &copy; 2026 <a href="https://vk.ru/need_for_speedl" target="_blank">Need For Speed</a><br>
+        Author: mefsol
     </footer>
 
     <div class="modal-overlay" id="guildModal">
@@ -463,6 +489,9 @@
         let editingMatchId = null;
         let globalMatches = []; 
         let playerDatabase = [];
+
+        // Состояние выпавших игроков (true = выпал)
+        let droppedState = { 1: false, 2: false, 3: false, 4: false };
 
         window.updateLiveClock = function() {
             const now = new Date();
@@ -584,6 +613,16 @@
             }
         }
 
+        // Переключение статуса "Выпал"
+        window.toggleDrop = function(btn, playerIndex) {
+            droppedState[playerIndex] = !droppedState[playerIndex];
+            if (droppedState[playerIndex]) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+
         window.startSession = function() {
             document.getElementById('startScreen').style.display = 'none';
             isSessionActive = true;
@@ -595,6 +634,11 @@
             display.innerText = 'ВЫБРАТЬ ВРАГА';
             display.style.fontSize = '36px';
             currentEnemyGuild = "";
+            
+            // Сброс кнопок "Выпал"
+            droppedState = { 1: false, 2: false, 3: false, 4: false };
+            document.querySelectorAll('.drop-btn').forEach(btn => btn.classList.remove('active'));
+
             updateRosterSelects();
             clearRoster();
         };
@@ -638,8 +682,25 @@
                 let name = document.getElementById(`player${i}`).value;
                 let sub = document.getElementById(`player${i}_sub`).value;
                 if (name) {
-                    if (sub) roster.push(`${name} (замена: ${sub})`);
-                    else roster.push(name);
+                    let text = name;
+                    if (droppedState[i]) text = `<span class="dropped">${name}</span>`;
+                    if (sub) text += ` (замена: ${sub})`;
+                    roster.push(text);
+                }
+            }
+            return roster.join(', ');
+        }
+        
+        function getRosterHTML() {
+            let roster = [];
+            for (let i = 1; i <= 4; i++) {
+                let name = document.getElementById(`player${i}`).value;
+                let sub = document.getElementById(`player${i}_sub`).value;
+                if (name) {
+                    let text = name;
+                    if (droppedState[i]) text = `<span class="dropped">${name}</span>`;
+                    if (sub) text += ` (замена: ${sub})`;
+                    roster.push(text);
                 }
             }
             return roster.join(', ');
@@ -656,11 +717,27 @@
             const now = new Date();
             const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
-            const rosterString = getRosterString();
+            const rosterString = getRosterString(); // Для базы данных
+            const rosterHTML = getRosterHTML(); // Для отображения
+            
             const roundData = { time: timeString, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
             currentSessionRounds.unshift(roundData);
-            renderCurrentRounds();
             
+            const list = document.getElementById('current-history-list');
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <div class="history-info">
+                    <div class="history-date">${timeString}</div>
+                    ${isDrop ? '<div class="history-note">Не 8/8</div>' : ''}
+                    ${rosterHTML ? `<div class="history-roster"><span>Состав:</span> ${rosterHTML}</div>` : ''}
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <div class="history-score">${scoreNfs} : ${scoreEnemy}</div>
+                    <button class="ctrl-btn delete-btn" style="font-size:16px; margin-left:10px;" onclick="removeCurrentRound(${currentSessionRounds.length - 1})">🗑️</button>
+                </div>
+            `;
+            list.prepend(item);
             document.getElementById('player-drop').checked = false;
         };
 
@@ -725,7 +802,9 @@
             editingMatchId = id;
             let match = globalMatches.find(m => m.id === id);
             if (match) {
-                document.getElementById('editRosterInput').value = match.roster || '';
+                // Убираем HTML теги для редактирования
+                let cleanRoster = match.roster.replace(/<[^>]*>/g, '');
+                document.getElementById('editRosterInput').value = cleanRoster || '';
                 document.getElementById('editRosterModal').style.display = 'flex';
                 document.getElementById('editRosterInput').focus();
             }
