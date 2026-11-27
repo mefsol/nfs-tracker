@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NFS Guild Stats</title>
-    <!-- PWA Манифест (добавим позже через файл) -->
     <meta name="theme-color" content="#cc0000">
     
     <style>
@@ -76,13 +75,6 @@
             transition: 0.3s;
         }
         .start-btn:hover { background: #ff1a1a; transform: scale(1.05); }
-
-        .live-toggle {
-            display: flex; align-items: center; gap: 10px;
-            font-family: 'Oswald', sans-serif; color: var(--text-muted);
-            cursor: pointer; font-size: 14px; letter-spacing: 1px;
-        }
-        .live-toggle input { width: 20px; height: 20px; accent-color: var(--accent-red); }
 
         .top-bar {
             display: flex; gap: 15px; margin-bottom: 10px;
@@ -203,6 +195,16 @@
             clip-path: polygon(2% 0, 98% 0, 100% 100%, 0% 100%);
         }
 
+        /* LIVE КНОПКА */
+        .live-btn-container { display: flex; justify-content: center; margin-bottom: 10px; }
+        .btn-live {
+            background: linear-gradient(90deg, #cc0000, #ff4400); color: white;
+            font-family: 'Oswald'; font-size: 14px; padding: 8px 20px; border: none; border-radius: 20px;
+            cursor: pointer; box-shadow: 0 0 15px rgba(204,0,0,0.5); font-weight: bold;
+            display: flex; align-items: center; gap: 5px; transition: 0.3s;
+        }
+        .btn-live:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(204,0,0,0.8); }
+
         /* ПРАВАЯ ПАНЕЛЬ */
         .right-panel {
             width: 400px; background: rgba(10, 5, 5, 0.7); backdrop-filter: blur(15px);
@@ -269,25 +271,54 @@
             .score-block { padding: 5px 10px; }
             .start-btn { font-size: 24px; padding: 20px 40px; }
         }
+
+        /* --- СТИЛИ ДЛЯ LIVE ТАБЛО (ТОЛЬКО ДЛЯ ЗРИТЕЛЕЙ) --- */
+        .viewer-mode { background: radial-gradient(circle at 50% 50%, #1a0000 0%, #000 100%) !important; }
+        .viewer-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            width: 100%; max-width: 1000px; margin: 0 auto; padding: 40px 20px; z-index: 10;
+        }
+        .live-badge {
+            background: #cc0000; color: white; font-family: 'Oswald'; padding: 5px 15px; border-radius: 4px;
+            font-weight: bold; letter-spacing: 2px; margin-bottom: 20px; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        .viewer-scoreboard {
+            display: flex; align-items: center; justify-content: space-between; width: 100%;
+            background: rgba(20, 10, 10, 0.8); border: 2px solid #331111; border-radius: 20px;
+            padding: 40px; box-shadow: 0 0 50px rgba(204,0,0,0.3); margin-bottom: 40px;
+        }
+        .viewer-team { text-align: center; flex: 1; }
+        .viewer-team h2 { font-family: 'Oswald'; font-size: 40px; margin: 0 0 10px 0; text-transform: uppercase; }
+        .viewer-score { font-family: 'Oswald'; font-size: 120px; font-weight: 700; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .viewer-score.nfs { color: #ff1a1a; }
+        .viewer-score.enemy { color: #fff; }
+        .viewer-vs { font-family: 'Oswald'; font-size: 60px; font-style: italic; color: #555; }
+
+        .viewer-rounds {
+            width: 100%; background: rgba(10, 5, 5, 0.8); border: 1px solid #331111;
+            border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .viewer-round-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(30, 15, 15, 0.5); padding: 15px 20px; border-radius: 8px;
+            border-left: 4px solid #cc0000; animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .viewer-round-score { font-family: 'Oswald'; font-size: 30px; font-weight: 700; }
+        .viewer-roster { text-align: center; font-size: 18px; color: #aaa; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <canvas id="stars-canvas"></canvas>
     
-    <div class="main-content">
-        <div class="left-panel">
-            <!-- Стартовый экран с переключателем Live -->
+    <div class="main-content" id="app-content">
+        <!-- Основной интерфейс (скрывается у зрителей) -->
+        <div class="left-panel" id="main-panel">
             <div class="start-screen" id="startScreen">
                 <button class="start-btn" onclick="startSession()">НАЧАТЬ СТАК</button>
-                <label class="live-toggle">
-                    <input type="checkbox" id="live-broadcast-toggle" onchange="toggleLiveBroadcast(this)"> 
-                    Включить Live-табло для зрителей
-                </label>
-                <div id="live-link-container" style="display:none; margin-top:10px; color:white;">
-                    Ссылка для зрителей: <br>
-                    <a href="#" id="live-link" target="_blank" style="color:var(--accent-red); font-weight:bold;">Открыть</a>
-                </div>
             </div>
 
             <div class="top-bar">
@@ -331,6 +362,10 @@
                 </div>
             </div>
 
+            <div class="live-btn-container">
+                <button class="btn-live" id="live-btn" onclick="startLiveBroadcast()">🔴 Включить LIVE-ТАБЛО</button>
+            </div>
+
             <div class="vs-container">
                 <div class="circle-wrapper">
                     <div class="guild-circle nfs">Need for Speed</div>
@@ -372,7 +407,7 @@
             </div>
         </div>
 
-        <div class="right-panel">
+        <div class="right-panel" id="side-panel">
             <div class="history-section current">
                 <div class="history-title">Текущий стак</div>
                 <div id="current-history-list"></div>
@@ -380,14 +415,39 @@
             <div class="history-section finished">
                 <div class="history-title">
                     Завершенные матчи
-                    <button class="manage-btn" onclick="exportToCSV()" style="font-size:10px; padding:4px 8px;">⬇️ CSV</button>
+                    <button class="manage-btn" onclick="exportAllToCSV()" style="font-size:10px; padding:4px 8px;">⬇️ CSV (Все)</button>
                 </div>
                 <div id="finished-history-list"></div>
             </div>
         </div>
     </div>
 
-    <footer>
+    <!-- LIVE ТАБЛО (Отображается только у зрителей) -->
+    <div id="viewer-ui" style="display:none; width:100%; height:100%; position:relative; z-index:10;">
+        <div class="viewer-container">
+            <div class="live-badge">LIVE MATCH</div>
+            
+            <div class="viewer-scoreboard">
+                <div class="viewer-team">
+                    <h2>NFS</h2>
+                    <div class="viewer-score nfs" id="v-score-nfs">0</div>
+                </div>
+                <div class="viewer-vs">VS</div>
+                <div class="viewer-team">
+                    <h2 id="v-enemy-name">ОЖИДАНИЕ</h2>
+                    <div class="viewer-score enemy" id="v-score-enemy">0</div>
+                </div>
+            </div>
+
+            <div class="viewer-roster" id="v-roster">Состав: Загрузка...</div>
+
+            <div class="viewer-rounds" id="v-rounds-container">
+                <!-- Сюда будут подтягиваться раунды -->
+            </div>
+        </div>
+    </div>
+
+    <footer id="main-footer">
         &copy; 2026 <a href="https://vk.ru/need_for_speedl" target="_blank">Need For Speed</a> | Author: mefsol
     </footer>
 
@@ -430,6 +490,14 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="editRosterModal">
+        <div class="modal-content">
+            <h3>Изменить состав</h3>
+            <input type="text" id="editRosterInput" class="modal-input" style="text-transform:none;" placeholder="Введите состав...">
+            <button class="modal-btn" onclick="saveEditedRoster()">Сохранить</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -447,7 +515,7 @@
         const db = getFirestore(app);
         const matchesCollection = collection(db, "nfs_matches");
         const rosterDocRef = doc(db, "nfs_settings", "roster");
-        const liveDocRef = doc(db, "nfs_settings", "live_session"); // Документ для табло
+        const liveDocRef = doc(db, "nfs_settings", "live_session"); 
 
         let currentEnemyGuild = "";
         let currentSessionRounds = [];
@@ -457,84 +525,63 @@
         let globalMatches = []; 
         let playerDatabase = [];
         let droppedState = { 1: false, 2: false, 3: false, 4: false };
-
-        // --- LIVE TАБЛО ---
         let isLiveBroadcast = false;
-        window.toggleLiveBroadcast = function(checkbox) {
-            isLiveBroadcast = checkbox.checked;
-            const linkContainer = document.getElementById('live-link-container');
-            if (isLiveBroadcast) {
-                linkContainer.style.display = 'block';
-                const currentUrl = window.location.href.split('?')[0];
-                document.getElementById('live-link').href = currentUrl + '?live=true';
-                document.getElementById('live-link').innerText = currentUrl + '?live=true';
-                updateLiveSession(); // Отправляем сразу
-            } else {
-                linkContainer.style.display = 'none';
-                // Очищаем документ
-                setDoc(liveDocRef, { active: false }); 
-            }
-        };
 
-        function updateLiveSession() {
-            if (!isLiveBroadcast) return;
-            const scoreNfs = document.getElementById('score-nfs').value;
-            const scoreEnemy = document.getElementById('score-enemy').value;
-            const roster = getRosterString();
-            
-            setDoc(liveDocRef, {
-                active: true,
-                enemyGuild: currentEnemyGuild || "Ожидание...",
-                scoreNfs: scoreNfs,
-                scoreEnemy: scoreEnemy,
-                roster: roster,
-                timestamp: Date.now()
-            });
-        }
-
-        // Проверка, если мы на странице зрителя
+        // ==========================================
+        // ЛОГИКА LIVE ТАБЛО
+        // ==========================================
         const isViewerMode = new URLSearchParams(window.location.search).has('live');
 
         if (isViewerMode) {
-            // Скрываем всё лишнее для зрителя
-            document.querySelector('.left-panel').innerHTML = '<h2 style="text-align:center; margin-top:50px;">Загрузка табло...</h2>';
-            document.querySelector('.right-panel').style.display = 'none';
-            
-            // Подписываемся на обновления
+            // Скрываем интерфейс админа, показываем табло
+            document.getElementById('app-content').style.display = 'none';
+            document.getElementById('main-footer').style.display = 'none';
+            document.body.classList.add('viewer-mode');
+            document.getElementById('viewer-ui').style.display = 'block';
+
+            // Подписка на обновления табло
             onSnapshot(liveDocRef, (docSnap) => {
                 if (docSnap.exists() && docSnap.data().active) {
                     const data = docSnap.data();
-                    document.querySelector('.left-panel').innerHTML = `
-                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
-                            <h1 style="font-family:'Oswald'; color:var(--accent-red); font-size:40px; margin-bottom:10px;">LIVE MATCH</h1>
-                            <div class="vs-container">
-                                <div class="circle-wrapper"><div class="guild-circle nfs">Need for Speed</div></div>
-                                <div class="vs-text">VS</div>
-                                <div class="circle-wrapper"><div class="guild-circle enemy">${data.enemyGuild}</div></div>
-                            </div>
-                            <div class="score-container">
-                                <div class="score-block" style="pointer-events:none;">
-                                    <input type="number" class="score-input" value="${data.scoreNfs}" readonly>
+                    
+                    document.getElementById('v-score-nfs').innerText = data.scoreNfs;
+                    document.getElementById('v-score-enemy').innerText = data.scoreEnemy;
+                    document.getElementById('v-enemy-name').innerText = data.enemyGuild;
+                    document.getElementById('v-roster').innerText = "Состав: " + (data.roster || "Не указан");
+                    
+                    const container = document.getElementById('v-rounds-container');
+                    container.innerHTML = '';
+                    
+                    if (data.roundsData && data.roundsData.length > 0) {
+                        data.roundsData.forEach(r => {
+                            const div = document.createElement('div');
+                            div.className = 'viewer-round-item';
+                            div.innerHTML = `
+                                <div>
+                                    <div style="font-family:Oswald; font-size:14px; color:#888;">${r.time} ${r.isDrop ? '<span style="color:orange">(Не 8/8)</span>' : ''}</div>
+                                    <div style="font-size:14px; margin-top:5px;">${r.roster || ''}</div>
                                 </div>
-                                <div class="dash">:</div>
-                                <div class="score-block" style="pointer-events:none;">
-                                    <input type="number" class="score-input" value="${data.scoreEnemy}" readonly>
-                                </div>
-                            </div>
-                            <div style="margin-top:20px; text-align:center; color:#aaa; font-size:14px;">
-                                <strong>Состав:</strong><br>${data.roster || 'Не указан'}
-                            </div>
-                        </div>
-                    `;
+                                <div class="viewer-round-score">${r.nfs} : ${r.enemy}</div>
+                            `;
+                            container.appendChild(div);
+                        });
+                    } else {
+                        container.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">Раунды еще не начались...</div>';
+                    }
                 } else {
-                    document.querySelector('.left-panel').innerHTML = '<h2 style="text-align:center; margin-top:50px;">Матч еще не начался или завершен.</h2>';
+                    document.getElementById('v-enemy-name').innerText = "МАТЧ ЗАВЕРШЕН";
+                    document.getElementById('v-rounds-container').innerHTML = '';
+                    document.getElementById('v-roster').innerText = '';
                 }
             });
+            
             // Прерываем выполнение остального скрипта для зрителя
-            throw new Error("Viewer mode"); 
+            throw new Error("Viewer mode active"); 
         }
 
-        // --- ОСНОВНАЯ ЛОГИКА ---
+        // ==========================================
+        // ОСНОВНАЯ ЛОГИКА (ДЛЯ АДМИНА)
+        // ==========================================
 
         window.updateLiveClock = function() {
             const now = new Date();
@@ -550,6 +597,7 @@
         setInterval(window.updateLiveClock, 1000);
         window.updateLiveClock();
 
+        // Фон
         const canvas = document.getElementById('stars-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -659,6 +707,7 @@
             droppedState[playerIndex] = !droppedState[playerIndex];
             if (droppedState[playerIndex]) btn.classList.add('active');
             else btn.classList.remove('active');
+            updateLiveSession();
         }
 
         window.startSession = function() {
@@ -676,7 +725,7 @@
             document.querySelectorAll('.drop-btn').forEach(btn => btn.classList.remove('active'));
             updateRosterSelects();
             clearRoster();
-            if(isLiveBroadcast) updateLiveSession();
+            updateLiveSession();
         };
 
         window.openModal = function() {
@@ -691,7 +740,7 @@
                 currentEnemyGuild = val;
                 document.getElementById('enemy-guild-display').innerText = val;
                 document.getElementById('guildModal').style.display = 'none';
-                if(isLiveBroadcast) updateLiveSession();
+                updateLiveSession();
             }
         };
         document.getElementById('guildInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') window.setEnemyGuild(); });
@@ -704,7 +753,7 @@
             if (val < 0) val = 0;
             el.value = val;
             pulseScore(id);
-            if(isLiveBroadcast) updateLiveSession();
+            updateLiveSession();
         };
 
         window.clearRoster = function() {
@@ -729,6 +778,45 @@
             return roster.join(', ');
         }
 
+        // ==========================================
+        // LIVE BROADCAST ФУНКЦИИ
+        // ==========================================
+        window.startLiveBroadcast = async function() {
+            if (!isSessionActive) { alert("Сначала начните стак!"); return; }
+            isLiveBroadcast = true;
+            document.getElementById('live-btn').innerText = "🔴 LIVE ВКЛЮЧЕН (Скопировать ссылку)";
+            document.getElementById('live-btn').style.background = "#fff";
+            document.getElementById('live-btn').style.color = "#cc0000";
+            
+            await updateLiveSession();
+            
+            const currentUrl = window.location.href.split('?')[0];
+            const liveUrl = currentUrl + '?live=true';
+            navigator.clipboard.writeText(liveUrl).then(() => {
+                alert(`Ссылка на LIVE-табло скопирована!\n\nОтправь её зрителям:\n${liveUrl}`);
+            });
+        }
+
+        async function updateLiveSession() {
+            if (!isLiveBroadcast) return;
+            const scoreNfs = document.getElementById('score-nfs').value;
+            const scoreEnemy = document.getElementById('score-enemy').value;
+            const roster = getRosterString();
+            
+            await setDoc(liveDocRef, {
+                active: true,
+                enemyGuild: currentEnemyGuild || "Ожидание...",
+                scoreNfs: scoreNfs,
+                scoreEnemy: scoreEnemy,
+                roster: roster,
+                roundsData: currentSessionRounds, // Передаем массив раундов!
+                timestamp: Date.now()
+            });
+        }
+
+        // ==========================================
+        // СОХРАНЕНИЕ РАУНДОВ
+        // ==========================================
         window.saveRound = function() {
             if (!isSessionActive) return;
             if (!currentEnemyGuild) { alert('Сначала выбери врага!'); return; }
@@ -744,6 +832,7 @@
             const roundData = { time: timeString, nfs: scoreNfs, enemy: scoreEnemy, isDrop: isDrop, roster: rosterString };
             currentSessionRounds.unshift(roundData);
             renderCurrentRounds();
+            updateLiveSession(); // Обновляем табло
             
             document.getElementById('player-drop').checked = false;
         };
@@ -752,13 +841,14 @@
             if(confirm('Удалить этот раунд?')) {
                 currentSessionRounds.splice(index, 1);
                 renderCurrentRounds();
+                updateLiveSession(); // Обновляем табло
             }
         }
 
         window.openEditRound = function(index) {
             editingRoundIndex = index;
             const round = currentSessionRounds[index];
-            document.getElementById('editRoundRosterInput').value = round.roster.replace(/<[^>]*>/g, ''); // убираем html теги
+            document.getElementById('editRoundRosterInput').value = round.roster.replace(/<[^>]*>/g, '');
             document.getElementById('editRoundNfs').value = round.nfs;
             document.getElementById('editRoundEnemy').value = round.enemy;
             document.getElementById('editRoundModal').style.display = 'flex';
@@ -772,6 +862,7 @@
             document.getElementById('editRoundModal').style.display = 'none';
             editingRoundIndex = null;
             renderCurrentRounds();
+            updateLiveSession(); // Обновляем табло
         }
 
         function renderCurrentRounds() {
@@ -825,10 +916,21 @@
                 await addDoc(matchesCollection, matchData);
                 document.getElementById('startScreen').style.display = 'flex';
                 isSessionActive = false;
-                if(isLiveBroadcast) { isLiveBroadcast = false; setDoc(liveDocRef, { active: false }); }
+                
+                // Отключаем лайф табло
+                if(isLiveBroadcast) { 
+                    isLiveBroadcast = false; 
+                    await setDoc(liveDocRef, { active: false }); 
+                    document.getElementById('live-btn').innerText = "🔴 Включить LIVE-ТАБЛО";
+                    document.getElementById('live-btn').style.background = "";
+                    document.getElementById('live-btn').style.color = "";
+                }
             } catch (e) { alert("Ошибка!"); }
         };
 
+        // ==========================================
+        // РАБОТА С ИСТОРИЕЙ
+        // ==========================================
         window.openEditRoster = function(id) {
             editingMatchId = id;
             let match = globalMatches.find(m => m.id === id);
@@ -869,8 +971,8 @@
             } else alert("История раундов недоступна.");
         }
 
-        // Экспорт в CSV
-        window.exportToCSV = function() {
+        // Экспорт всех матчей в CSV
+        window.exportAllToCSV = function() {
             if(globalMatches.length === 0) { alert("Нет матчей для экспорта."); return; }
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
             csvContent += "Дата,Противник,Счет NFS,Счет Врага,Раундов,Вылеты,Состав\n";
@@ -884,7 +986,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "nfs_stats.csv");
+            link.setAttribute("download", "nfs_all_matches.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -941,6 +1043,7 @@
                                 <button class="ctrl-btn" onclick="openEditRoster('${match.id}')">✏️ Изменить</button>
                                 <button class="ctrl-btn" onclick="viewRounds('${match.id}')">👁️ Раунды</button>
                                 <button class="ctrl-btn" onclick="copyMatchToClipboard('${match.id}')">📋 Скопировать</button>
+                                <button class="ctrl-btn" onclick="downloadMatchTXT('${match.id}')">⬇️ Скачать</button>
                                 <button class="ctrl-btn delete-btn" onclick="deleteMatch('${match.id}')">🗑️ Удалить</button>
                             </div>
                         </div>
@@ -950,20 +1053,53 @@
             });
         }
 
-        // Копирование текста в буфер
         window.copyMatchToClipboard = function(id) {
             let match = globalMatches.find(m => m.id === id);
             if (!match) return;
             
             let cleanRoster = match.roster.replace(/<[^>]*>/g, '');
-            let text = `📅 ${match.date}\n⚔️ NFS vs ${match.enemy}\n🏆 Счет: ${match.scoreNfs} : ${match.scoreEnemy}\n👥 Состав: ${cleanRoster}`;
-            if (match.isDrop) text += `\n⚠️ Играли не 8/8`;
+            let text = `📅 Дата: ${match.date}\n⚔️ Против: ${match.enemy}\n🏆 Итоговый счет: ${match.scoreNfs} : ${match.scoreEnemy}\n👥 Состав: ${cleanRoster}\n`;
+            if (match.isDrop) text += `⚠️ Играли не 8/8\n`;
+            
+            if (match.roundsData && match.roundsData.length > 0) {
+                text += `\n--- ИСТОРИЯ РАУНДОВ ---\n`;
+                match.roundsData.forEach((r, i) => {
+                    let cleanRRoster = r.roster ? r.roster.replace(/<[^>]*>/g, '') : '';
+                    text += `${i+1}. [${r.time}] Счет: ${r.nfs} : ${r.enemy} ${r.isDrop ? '(Не 8/8)' : ''} | Состав: ${cleanRRoster}\n`;
+                });
+            }
             
             navigator.clipboard.writeText(text).then(() => {
-                alert('Итог матча скопирован в буфер обмена! Можно вставлять в ВК.');
+                alert('Полный текст (с раундами) скопирован!');
             }).catch(err => {
                 alert('Ошибка при копировании: ' + err);
             });
+        }
+
+        window.downloadMatchTXT = function(id) {
+            let match = globalMatches.find(m => m.id === id);
+            if (!match) return;
+            
+            let cleanRoster = match.roster.replace(/<[^>]*>/g, '');
+            let text = `--- NFS GUILD STATS ---\n\nДата: ${match.date}\nПротивник: ${match.enemy}\nИтоговый счет: ${match.scoreNfs} : ${match.scoreEnemy}\nСостав: ${cleanRoster}\n`;
+            if (match.isDrop) text += `Примечание: играли не 8/8\n`;
+            
+            if (match.roundsData && match.roundsData.length > 0) {
+                text += `\n--- ИСТОРИЯ РАУНДОВ ---\n`;
+                match.roundsData.forEach((r, i) => {
+                    let cleanRRoster = r.roster ? r.roster.replace(/<[^>]*>/g, '') : '';
+                    text += `Раунд ${i+1} [${r.time}]: ${r.nfs} : ${r.enemy} ${r.isDrop ? '(Не 8/8)' : ''}\nСостав: ${cleanRRoster}\n\n`;
+                });
+            }
+            
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `match_${match.enemy}_${match.date}.txt`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
