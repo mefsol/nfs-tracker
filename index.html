@@ -29,9 +29,8 @@
             font-family: 'Montserrat', sans-serif;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
+            height: 100vh; /* Строгая высота экрана */
+            overflow: hidden; /* Запрет скролла всей страницы */
         }
 
         #stars-canvas {
@@ -45,7 +44,7 @@
             flex: 1;
             position: relative;
             z-index: 1;
-            min-height: 100vh;
+            overflow: hidden;
         }
 
         .left-panel {
@@ -56,8 +55,10 @@
             position: relative;
             backdrop-filter: blur(15px);
             border-right: 1px solid var(--border-color);
+            overflow-y: auto; /* Если экран маленький, левая панель скроллится */
         }
 
+        /* СТАРТОВЫЙ ЭКРАН */
         .start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5, 0, 0, 0.95);
@@ -86,8 +87,7 @@
             background: var(--input-bg); backdrop-filter: blur(10px);
             border: 1px solid var(--border-color); color: var(--text-main);
             padding: 10px 15px; border-radius: 12px; outline: none;
-            text-align: center; cursor: pointer;
-            transition: 0.3s;
+            text-align: center; cursor: pointer; transition: 0.3s;
         }
         input[type="date"]:focus, input[type="time"]:focus { border-color: var(--accent-red); box-shadow: 0 0 15px rgba(204,0,0,0.3); }
 
@@ -120,16 +120,14 @@
             font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
             background: var(--input-bg); border: 1px solid var(--border-color);
             color: var(--text-main); padding: 8px 5px; border-radius: 6px;
-            outline: none; text-align: center; width: 100%; cursor: pointer;
-            transition: 0.3s;
+            outline: none; text-align: center; width: 100%; cursor: pointer; transition: 0.3s;
         }
         select.roster-input:focus { border-color: var(--accent-red); box-shadow: 0 0 10px rgba(204,0,0,0.3); }
 
         .drop-btn {
             background: #1a0a0a; border: 1px solid #331111; color: #555;
             border-radius: 6px; font-size: 16px; cursor: pointer; padding: 0 10px;
-            display: flex; align-items: center; justify-content: center;
-            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
         }
         .drop-btn:hover { border-color: var(--accent-red); }
         .drop-btn.active { background: var(--accent-red); color: white; box-shadow: 0 0 15px var(--accent-glow); border-color: #ff1a1a; }
@@ -155,9 +153,6 @@
         .guild-circle.nfs { border-color: var(--accent-red); box-shadow: 0 0 40px var(--accent-glow), inset 0 0 40px rgba(204,0,0,0.2); }
         .guild-circle.enemy { cursor: pointer; }
         .guild-circle.enemy:hover { border-color: var(--text-main); box-shadow: 0 0 50px rgba(255,255,255,0.3), inset 0 0 30px rgba(255,255,255,0.1); transform: scale(1.02); }
-
-        .progress-bar-bg { width: 150px; height: 8px; background: #111; border-radius: 4px; border: 1px solid #333; overflow: hidden;}
-        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #550000, #ff1a1a); transition: width 0.5s; box-shadow: 0 0 10px var(--accent-red); }
 
         .vs-text { font-family: 'Oswald', sans-serif; font-size: 60px; font-weight: 700; font-style: italic; color: var(--text-main); text-shadow: 0 0 20px rgba(255,255,255,0.2);}
 
@@ -218,21 +213,34 @@
         }
         .btn-live:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(204,0,0,0.8); }
 
-        /* ПРАВАЯ ПАНЕЛЬ */
+        /* ПРАВАЯ ПАНЕЛЬ С ВКЛАДКАМИ */
         .right-panel {
-            width: 400px; background: rgba(10, 5, 5, 0.7); backdrop-filter: blur(15px);
-            display: flex; flex-direction: column;
+            width: 420px; background: rgba(10, 5, 5, 0.7); backdrop-filter: blur(15px);
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .history-section { padding: 20px; display: flex; flex-direction: column; }
-        .history-section.current { border-bottom: 1px solid var(--border-color); }
-        
-        .history-title {
-            font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700;
-            margin-bottom: 15px; color: var(--text-main); text-transform: uppercase;
-            display: flex; justify-content: space-between; align-items: center;
+        .tabs-header {
+            display: flex; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.3);
         }
-        
+        .tab-btn {
+            flex: 1; padding: 15px; background: transparent; border: none; border-bottom: 2px solid transparent;
+            color: var(--text-muted); font-family: 'Oswald'; font-size: 16px; font-weight: 700;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s;
+        }
+        .tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .tab-btn.active { color: var(--accent-red); border-bottom-color: var(--accent-red); background: rgba(204,0,0,0.1); text-shadow: 0 0 10px var(--accent-glow); }
+
+        .tab-content {
+            flex: 1; overflow-y: auto; padding: 20px; display: none;
+        }
+        .tab-content.active { display: block; }
+
+        /* СКРОЛЛБАР */
+        .tab-content::-webkit-scrollbar { width: 6px; }
+        .tab-content::-webkit-scrollbar-track { background: transparent; }
+        .tab-content::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        .tab-content::-webkit-scrollbar-thumb:hover { background: var(--accent-red); }
+
         .history-item {
             background: rgba(20, 10, 10, 0.6); border: 1px solid var(--border-color);
             border-left: 3px solid var(--accent-red); padding: 12px;
@@ -254,7 +262,6 @@
         }
         .ctrl-btn:hover { background: var(--accent-red); border-color: var(--accent-red); }
 
-        /* ИСПРАВЛЕНИЕ СТИЛЕЙ ЗАЧЕРКИВАНИЯ И ЖЕЛТОЙ ПОМЕТКИ */
         .dropped { color: #ff4444 !important; text-decoration: line-through; }
         .history-note { font-size: 12px; color: #ffaa00 !important; font-weight: bold; margin-top: 2px;}
 
@@ -284,7 +291,7 @@
         @media (max-width: 900px) {
             .main-content { flex-direction: column; }
             .left-panel { padding: 15px; }
-            .right-panel { width: 100%; border-left: none; border-top: 1px solid var(--border-color); }
+            .right-panel { width: 100%; border-left: none; border-top: 1px solid var(--border-color); height: 50vh;}
             .roster-col { min-width: 45%; }
             .guild-circle { width: 140px; height: 140px; font-size: 20px; }
             .vs-text { font-size: 40px; }
@@ -337,7 +344,6 @@
     <canvas id="stars-canvas"></canvas>
     
     <div class="main-content" id="app-content">
-        <!-- Основной интерфейс -->
         <div class="left-panel" id="main-panel">
             <div class="start-screen" id="startScreen">
                 <button class="start-btn" onclick="startSession()">НАЧАТЬ СТАК</button>
@@ -391,12 +397,10 @@
             <div class="vs-container">
                 <div class="circle-wrapper">
                     <div class="guild-circle nfs">Need for Speed</div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-nfs"></div></div>
                 </div>
                 <div class="vs-text">VS</div>
                 <div class="circle-wrapper">
                     <div class="guild-circle enemy" id="enemy-guild-display" onclick="openModal()">ВРАГ</div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-enemy"></div></div>
                 </div>
             </div>
 
@@ -429,15 +433,22 @@
             </div>
         </div>
 
+        <!-- ПРАВАЯ ПАНЕЛЬ С ВКЛАДКАМИ -->
         <div class="right-panel" id="side-panel">
-            <div class="history-section current">
-                <div class="history-title">Текущий стак</div>
+            <div class="tabs-header">
+                <button class="tab-btn active" id="tab-btn-current" onclick="switchTab('current')">Текущий стак</button>
+                <button class="tab-btn" id="tab-btn-finished" onclick="switchTab('finished')">Завершенные</button>
+            </div>
+
+            <!-- Вкладка ТЕКУЩИЙ СТАК -->
+            <div class="tab-content active" id="tab-current">
                 <div id="current-history-list"></div>
             </div>
-            <div class="history-section finished">
-                <div class="history-title">
-                    Завершенные матчи
-                    <button class="manage-btn" onclick="exportAllToCSV()" style="font-size:10px; padding:4px 8px;">⬇️ CSV (Все)</button>
+
+            <!-- Вкладка ЗАВЕРШЕННЫЕ -->
+            <div class="tab-content" id="tab-finished">
+                <div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
+                    <button class="manage-btn" onclick="exportAllToCSV()" style="font-size:11px; padding:6px 12px;">⬇️ Скачать CSV</button>
                 </div>
                 <div id="finished-history-list"></div>
             </div>
@@ -445,7 +456,7 @@
     </div>
 
     <!-- LIVE ТАБЛО -->
-    <div id="viewer-ui" style="display:none; width:100%; height:100%; position:relative; z-index:10;">
+    <div id="viewer-ui" style="display:none; width:100%; height:100%; position:relative; z-index:10; overflow-y:auto;">
         <div class="viewer-container">
             <div class="live-badge">LIVE MATCH</div>
             
@@ -547,7 +558,23 @@
         let droppedState = { 1: false, 2: false, 3: false, 4: false };
         let isLiveBroadcast = false;
 
-        // === ЛОГИКА LIVE ТАБЛО (ЗРИТЕЛИ) ===
+        // === ВКЛАДКИ ===
+        window.switchTab = function(tab) {
+            document.getElementById('tab-btn-current').classList.remove('active');
+            document.getElementById('tab-btn-finished').classList.remove('active');
+            document.getElementById('tab-current').classList.remove('active');
+            document.getElementById('tab-finished').classList.remove('active');
+
+            if(tab === 'current') {
+                document.getElementById('tab-btn-current').classList.add('active');
+                document.getElementById('tab-current').classList.add('active');
+            } else {
+                document.getElementById('tab-btn-finished').classList.add('active');
+                document.getElementById('tab-finished').classList.add('active');
+            }
+        }
+
+        // === LIVE ТАБЛО ===
         const isViewerMode = new URLSearchParams(window.location.search).has('live');
 
         if (isViewerMode) {
@@ -559,7 +586,6 @@
             onSnapshot(liveDocRef, (docSnap) => {
                 if (docSnap.exists() && docSnap.data().active) {
                     const data = docSnap.data();
-                    
                     document.getElementById('v-score-nfs').innerText = data.scoreNfs;
                     document.getElementById('v-score-enemy').innerText = data.scoreEnemy;
                     document.getElementById('v-enemy-name').innerText = data.enemyGuild;
@@ -590,7 +616,6 @@
                     document.getElementById('v-roster').innerText = '';
                 }
             });
-            
             throw new Error("Viewer mode active"); 
         }
 
@@ -635,16 +660,6 @@
             const el = document.getElementById(id);
             el.classList.add('pulse-anim');
             setTimeout(() => el.classList.remove('pulse-anim'), 150);
-            updateProgressBars();
-        }
-
-        function updateProgressBars() {
-            const scoreNfs = parseInt(document.getElementById('score-nfs').value) || 0;
-            const scoreEnemy = parseInt(document.getElementById('score-enemy').value) || 0;
-            let pctNfs = Math.min((scoreNfs / 8) * 100, 100);
-            let pctEnemy = Math.min((scoreEnemy / 8) * 100, 100);
-            document.getElementById('progress-nfs').style.width = `${pctNfs}%`;
-            document.getElementById('progress-enemy').style.width = `${pctEnemy}%`;
         }
 
         async function loadPlayersFromFirebase() {
@@ -726,7 +741,7 @@
             isSessionActive = true;
             document.getElementById('score-nfs').value = 0;
             document.getElementById('score-enemy').value = 0;
-            updateProgressBars();
+            
             currentSessionRounds = [];
             document.getElementById('current-history-list').innerHTML = '';
             document.getElementById('enemy-guild-display').innerText = 'ВРАГ';
@@ -737,6 +752,7 @@
             updateRosterSelects();
             clearRoster();
             updateLiveSession();
+            switchTab('current'); // Переключаем вкладку на текущий
         };
 
         window.openModal = function() {
@@ -876,7 +892,6 @@
             currentSessionRounds.forEach((round, index) => {
                 const item = document.createElement('div');
                 item.className = 'history-item';
-                // ВАЖНО: Используем innerHTML для раундов, чтобы теги <span> работали
                 item.innerHTML = `
                     <div style="display:flex; justify-content:space-between; width:100%;">
                         <div class="history-info">
@@ -930,6 +945,7 @@
                     document.getElementById('live-btn').style.background = "";
                     document.getElementById('live-btn').style.color = "";
                 }
+                switchTab('finished'); // Переключаем на завершенные
             } catch (e) { alert("Ошибка!"); }
         };
 
